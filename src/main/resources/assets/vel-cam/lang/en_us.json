@@ -1,0 +1,4 @@
+{
+  "key.vel-cam.toggle": "Toggle velocity camera",
+  "message.vel-cam.toggled": "Velocity camera: %s"
+}

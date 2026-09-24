@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "vel-cam",
+	"version": "${version}",
+	"name": "Vel Cam",
+	"description": "Toggle a camera that faces the direction the player is moving.",
+	"authors": [
+		"jealoustone"
+	],
+	"license": "CC0-1.0",
+	"icon": "assets/vel-cam/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"jealoustone.velcam.client.VelCamClient"
+		]
+	},
+	"mixins": [
+		"vel-cam.client.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
