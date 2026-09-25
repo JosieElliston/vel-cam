@@ -7,7 +7,7 @@
 	"authors": [
 		"jealoustone"
 	],
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/vel-cam/icon.png",
 	"environment": "client",
 	"entrypoints": {
