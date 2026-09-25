@@ -2,12 +2,11 @@ package jealoustone.velcam.client.mixin;
 
 import jealoustone.velcam.client.VelCamClient;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -32,26 +31,29 @@ public abstract class CameraMixin {
 	private Vec3 velCam$currentVelocity = Vec3.ZERO;
 
 	@Shadow
-	@Final
-	private Minecraft minecraft;
-
-	@Shadow
 	protected abstract void setRotation(float yaw, float pitch);
 
 	@Inject(
-			method = "alignWithEntity",
-			at = @At(
-					value = "FIELD",
-					target = "Lnet/minecraft/client/Camera;detached:Z",
-					opcode = Opcodes.PUTFIELD,
-					shift = At.Shift.AFTER
-			)
+			method = "setup",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setPosition(DDD)V", shift = At.Shift.AFTER)
 	)
-	private void velCam$facePlayerVelocity(float partialTick, CallbackInfo ci) {
+	private void velCam$facePlayerVelocity(Level level, Entity entity, boolean detached, boolean reverse, float partialTick, CallbackInfo ci) {
+		velCam$setVelocityRotation(entity, partialTick);
+	}
+
+	@Inject(
+			method = "setup",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setPosition(Lnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.AFTER)
+	)
+	private void velCam$facePlayerVelocityInMinecart(Level level, Entity entity, boolean detached, boolean reverse, float partialTick, CallbackInfo ci) {
+		velCam$setVelocityRotation(entity, partialTick);
+	}
+
+	@Unique
+	private void velCam$setVelocityRotation(Entity entity, float partialTick) {
 		VelCamClient.setCameraFollowingVelocity(false);
 
-		LocalPlayer player = minecraft.player;
-		if (player == null) {
+		if (!(entity instanceof LocalPlayer player)) {
 			return;
 		}
 

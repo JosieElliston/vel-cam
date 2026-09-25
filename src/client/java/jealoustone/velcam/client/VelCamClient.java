@@ -3,14 +3,14 @@ package jealoustone.velcam.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -28,7 +28,7 @@ public class VelCamClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		KeyMapping toggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+		KeyMapping toggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
 				"key.vel-cam.toggle",
 				InputConstants.Type.KEYSYM,
 				GLFW.GLFW_KEY_C,
@@ -43,10 +43,10 @@ public class VelCamClient implements ClientModInitializer {
 				}
 
 				if (client.player != null) {
-					client.player.sendSystemMessage(Component.translatable(
+					client.player.displayClientMessage(Component.translatable(
 							"message.vel-cam.toggled",
 							Component.translatable(enabled ? "options.on" : "options.off")
-					));
+					), true);
 				}
 			}
 		});
@@ -66,7 +66,7 @@ public class VelCamClient implements ClientModInitializer {
 		cameraFollowingVelocity = followingVelocity;
 	}
 
-	private static void extractLookCrosshair(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+	private static void extractLookCrosshair(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		Minecraft client = Minecraft.getInstance();
 		LocalPlayer player = client.player;
 		if (!enabled || !cameraFollowingVelocity || player == null
@@ -76,7 +76,7 @@ public class VelCamClient implements ClientModInitializer {
 
 		float partialTick = deltaTracker.getGameTimeDeltaPartialTick(true);
 		Vec3 lookDirection = player.getViewVector(partialTick);
-		Camera camera = client.gameRenderer.mainCamera();
+		Camera camera = client.gameRenderer.getMainCamera();
 		Vector3fc cameraForward = camera.forwardVector();
 		double facingCamera = lookDirection.x * cameraForward.x()
 				+ lookDirection.y * cameraForward.y()
