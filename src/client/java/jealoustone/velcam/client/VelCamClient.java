@@ -24,6 +24,7 @@ public class VelCamClient implements ClientModInitializer {
 	private static final Identifier CROSSHAIR_SPRITE = Identifier.withDefaultNamespace("hud/crosshair");
 	private static final Identifier LOOK_CROSSHAIR = Identifier.fromNamespaceAndPath("vel-cam", "look_crosshair");
 	private static boolean enabled;
+	private static boolean cameraFollowingVelocity;
 
 	@Override
 	public void onInitializeClient() {
@@ -37,6 +38,9 @@ public class VelCamClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (toggleKey.consumeClick()) {
 				enabled = !enabled;
+				if (!enabled) {
+					cameraFollowingVelocity = false;
+				}
 
 				if (client.player != null) {
 					client.player.sendSystemMessage(Component.translatable(
@@ -58,10 +62,15 @@ public class VelCamClient implements ClientModInitializer {
 		return enabled;
 	}
 
+	public static void setCameraFollowingVelocity(boolean followingVelocity) {
+		cameraFollowingVelocity = followingVelocity;
+	}
+
 	private static void extractLookCrosshair(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		Minecraft client = Minecraft.getInstance();
 		LocalPlayer player = client.player;
-		if (!enabled || player == null || !client.options.getCameraType().isFirstPerson()) {
+		if (!enabled || !cameraFollowingVelocity || player == null
+				|| !client.options.getCameraType().isFirstPerson()) {
 			return;
 		}
 
@@ -82,15 +91,36 @@ public class VelCamClient implements ClientModInitializer {
 			return;
 		}
 
-		int centerX = (int) Math.round((projected.x + 1.0) * graphics.guiWidth() * 0.5);
-		int centerY = (int) Math.round((1.0 - projected.y) * graphics.guiHeight() * 0.5);
+		int crosshairX = (int) Math.floor(
+				(projected.x + 1.0) * graphics.guiWidth() * 0.5 - CROSSHAIR_SIZE * 0.5
+		);
+		int crosshairY = (int) Math.floor(
+				(1.0 - projected.y) * graphics.guiHeight() * 0.5 - CROSSHAIR_SIZE * 0.5
+		);
+		int vanillaCrosshairX = (graphics.guiWidth() - CROSSHAIR_SIZE) / 2;
+		int vanillaCrosshairY = (graphics.guiHeight() - CROSSHAIR_SIZE) / 2;
+		if (Math.abs(crosshairX - vanillaCrosshairX) <= 2
+				&& Math.abs(crosshairY - vanillaCrosshairY) <= 2) {
+			return;
+		}
+
 		graphics.blitSprite(
-				RenderPipelines.CROSSHAIR,
+				RenderPipelines.GUI_TEXTURED,
 				CROSSHAIR_SPRITE,
-				centerX - CROSSHAIR_SIZE / 2,
-				centerY - CROSSHAIR_SIZE / 2,
+				crosshairX + 1,
+				crosshairY + 1,
 				CROSSHAIR_SIZE,
-				CROSSHAIR_SIZE
+				CROSSHAIR_SIZE,
+				0xFF000000
+		);
+		graphics.blitSprite(
+				RenderPipelines.GUI_TEXTURED,
+				CROSSHAIR_SPRITE,
+				crosshairX,
+				crosshairY,
+				CROSSHAIR_SIZE,
+				CROSSHAIR_SIZE,
+				0xFFFFFFFF
 		);
 	}
 }

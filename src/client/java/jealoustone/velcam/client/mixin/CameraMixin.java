@@ -48,6 +48,8 @@ public abstract class CameraMixin {
 			)
 	)
 	private void velCam$facePlayerVelocity(float partialTick, CallbackInfo ci) {
+		VelCamClient.setCameraFollowingVelocity(false);
+
 		LocalPlayer player = minecraft.player;
 		if (player == null) {
 			return;
@@ -74,6 +76,7 @@ public abstract class CameraMixin {
 		float yaw = (float) Math.toDegrees(Math.atan2(-velocity.x, velocity.z));
 		float pitch = (float) Math.toDegrees(Math.atan2(-velocity.y, horizontalSpeed));
 		setRotation(yaw, pitch);
+		VelCamClient.setCameraFollowingVelocity(true);
 	}
 
 	@Unique
